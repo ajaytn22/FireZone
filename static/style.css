@@ -494,7 +494,7 @@ select {
 .results-admin, .results-section {
   padding: 30px 20px;
   background-color: #121212;
-  color: #fff;
+  color: #30bd40;
   text-align: center;
 }
 
@@ -571,3 +571,95 @@ select {
   background-color: #2a2a2a;
 }
 
+/* ---------- Mobile Responsive Enhancements ---------- */
+@media (max-width: 768px) {
+  /* Responsive Navbar */
+  .nav-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 10px 0;
+  }
+
+  header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .logo {
+    margin-bottom: 10px;
+  }
+
+  /* Hero Banner Text */
+  .hero-banner {
+    height: 60vh;
+    background-size: cover;
+  }
+
+  .intro-text h1 {
+    font-size: 24px;
+  }
+
+  .intro-text p {
+    font-size: 16px;
+    padding: 0 10px;
+  }
+
+  .join-now-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+
+  /* Member Grid */
+  .member-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Tournament Card */
+  .tournament-card {
+    width: 90%;
+  }
+
+  /* Responsive Table */
+  .results-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .results-table thead {
+    display: none;
+  }
+
+  .results-table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #333;
+  }
+
+  .results-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    position: relative;
+  }
+
+  .results-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #ffcc00;
+    min-width: 120px;
+  }
+
+  /* Admin login */
+  .login-container {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .form-section {
+    width: 95%;
+    padding: 20px;
+  }
+}
