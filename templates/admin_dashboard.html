@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <a href="/logout">Logout</a>
+  </header>
+
+  <!-- Add Tournament -->
+  <form method="POST" action="/add" class="form-section">
+    <input type="text" name="name" placeholder="Tournament Name" required>
+    <input type="url" name="link" placeholder="Google Form Link" required>
+    <select name="status" required>
+      <option value="Upcoming">Upcoming</option>
+      <option value="Ongoing">Ongoing</option>
+    </select>
+    <button type="submit">Add</button>
+  </form>
+
+  <!-- Tournament Table -->
+  <table class="table-section">
+    <tr>
+      <th>Name</th>
+      <th>Link</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    {% for t in tournaments %}
+    <tr>
+      <td>{{ t[1] }}</td>
+      <td><a href="{{ t[2] }}" target="_blank">Join</a></td>
+      <td>{{ t[3] }}</td>
+      <td><a href="/delete/{{ t[0] }}">Delete</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <!-- Add Result Section -->
+  <section class="results-admin">
+    <h2>🏆 Add Tournament Results (5 Rounds)</h2>
+    <form method="POST" action="/add_result">
+      <input type="text" name="squad" placeholder="Squad Name" required><br><br>
+
+      {% for i in range(1, 6) %}
+        <label>Round {{ i }}</label><br>
+        <input type="number" name="r{{ i }}_placement" placeholder="Placement (1-12)" min="1" max="12" required>
+        <input type="number" name="r{{ i }}_kills" placeholder="Kills" min="0" required><br><br>
+      {% endfor %}
+
+      <button type="submit">Add Result</button>
+    </form>
+
+    <!-- Results Table -->
+    <h2>📊 Submitted Results</h2>
+    <table class="results-table">
+      <tr>
+        <th>Squad</th>
+        <th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th>
+        <th>Total Kills</th>
+        <th>Total Points</th>
+        <th>Action</th>
+      </tr>
+      {% for r in results %}
+      {% set kills_total = r[3]+r[5]+r[7]+r[9]+r[11] %}
+      {% set points_total =
+        placement_points.get(r[2], 0) + r[3]*5 +
+        placement_points.get(r[4], 0) + r[5]*5 +
+        placement_points.get(r[6], 0) + r[7]*5 +
+        placement_points.get(r[8], 0) + r[9]*5 +
+        placement_points.get(r[10], 0) + r[11]*5
+      %}
+      <tr>
+        <td>{{ r[1] }}</td>
+        <td>{{ r[2] }}/{{ r[3] }}</td>
+        <td>{{ r[4] }}/{{ r[5] }}</td>
+        <td>{{ r[6] }}/{{ r[7] }}</td>
+        <td>{{ r[8] }}/{{ r[9] }}</td>
+        <td>{{ r[10] }}/{{ r[11] }}</td>
+        <td>{{ kills_total }}</td>
+        <td>{{ points_total }}</td>
+        <td><a href="/delete_result/{{ r[0] }}">Delete</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Fire Hub</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">🔥 Fire Zone</div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#" onclick="showSection('home')">Home</a></li>
+        <li><a href="#" onclick="showSection('tournaments')">Tournaments</a></li>
+        <li><a href="#" onclick="showSection('contact')">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Home Section -->
+  <section class="section" id="home">
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div class="overlay">
+        <div class="intro-text">
+          <h1>🔥 Welcome to FireZone</h1>
+          <p>Join thrilling Free Fire tournaments and become the legend.</p>
+          <a href="#" class="join-now-btn" onclick="showSection('tournaments')">🎮 Join Now</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members Section -->
+    <div class="members">
+      <h2>👥 Meet the Fire Legends</h2>
+      <div class="member-grid">
+        <div class="member">
+          <img src="{{ url_for('static', filename='member1.jpg') }}" alt="Member 1" />
+          <p>Pavan</p>
+        </div>
+        <div class="member">
+          <img src="{{ url_for('static', filename='member2.jpg') }}" alt="Member 2" />
+          <p>Puneeth</p>
+        </div>
+        <div class="member">
+          <img src="{{ url_for('static', filename='member3.jpg') }}" alt="Member 3" />
+          <p>Akshay</p>
+        </div>
+        <div class="member">
+          <img src="{{ url_for('static', filename='member4.jpg') }}" alt="Member 4" />
+          <p>Rohan</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tournaments Section -->
+  <section class="tournaments section" id="tournaments" style="display: none;">
+    <h2>🔴 Ongoing Tournaments</h2>
+    {% if ongoing %}
+      {% for name, link in ongoing %}
+        <div class="tournament-card">
+          <h3>{{ name }}</h3>
+          <a href="{{ link }}" target="_blank" class="join-btn">Join Now</a>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No ongoing tournaments.</p>
+    {% endif %}
+
+    <h2 style="margin-top: 40px;">🟢 Upcoming Tournaments</h2>
+    {% if upcoming %}
+      {% for name, link in upcoming %}
+        <div class="tournament-card">
+          <h3>{{ name }}</h3>
+          <a href="{{ link }}" target="_blank" class="join-btn">Join Now</a>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No upcoming tournaments.</p>
+    {% endif %}
+
+    <h2 style="margin-top: 50px;">🏁 Tournament Results</h2>
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Squad</th>
+          <th>Total Kills</th>
+          <th>Total Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for squad, rank, kills, total in results %}
+        <tr class="{% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">
+          <td>{{ loop.index }}</td>
+          <td>{{ squad }}</td>
+          <td>{{ kills }}</td>
+          <td>{{ total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact section" id="contact" style="display: none;">
+    <h2>📞 Contact Us</h2>
+    <p>Email: support@freefirehub.com</p>
+    <p>Instagram: <a href="https://instagram.com" target="_blank">@yourprofile</a></p>
+    <p>Discord: <a href="https://discord.gg/3HJVyGss" target="_blank">Join Server</a></p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Fire Zone. All rights reserved.</p>
+    <div class="social-links">
+      <a href="https://instagram.com" target="_blank">Instagram</a>
+      <a href="https://youtube.com" target="_blank">YouTube</a>
+      <a href="https://discord.gg/3HJVyGss" target="_blank">Discord</a>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script>
+    function showSection(id) {
+      const sections = document.querySelectorAll('.section');
+      sections.forEach(sec => sec.style.display = 'none');
+      const target = document.getElementById(id);
+      if (target) {
+        target.style.display = 'block';
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    window.onload = () => showSection('home');
+  </script>
+
+</body>
+</html>
