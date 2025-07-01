@@ -22,7 +22,6 @@
 
   <!-- Home Section -->
   <section class="section" id="home">
-    <!-- Hero Banner -->
     <div class="hero-banner">
       <div class="overlay">
         <div class="intro-text">
@@ -33,17 +32,16 @@
       </div>
     </div>
 
-    <!-- Members Section -->
     <div class="members">
       <h2>👥 Meet the Fire Legends</h2>
       <div class="member-grid">
         <div class="member">
-          <img src="{{ url_for('static', filename='member1.jpg') }}" alt="Member 1" />
-          <p>Pavan</p>
+          <img src="{{ url_for('static', filename='member2.jpg') }}" alt="Member 1" />
+          <p>Puneeth</p>
         </div>
         <div class="member">
-          <img src="{{ url_for('static', filename='member2.jpg') }}" alt="Member 2" />
-          <p>Puneeth</p>
+          <img src="{{ url_for('static', filename='member1.jpg') }}" alt="Member 2" />
+          <p>Rohan</p>
         </div>
         <div class="member">
           <img src="{{ url_for('static', filename='member3.jpg') }}" alt="Member 3" />
@@ -51,7 +49,7 @@
         </div>
         <div class="member">
           <img src="{{ url_for('static', filename='member4.jpg') }}" alt="Member 4" />
-          <p>Rohan</p>
+          <p>Shivaraj</p>
         </div>
       </div>
     </div>
@@ -83,34 +81,50 @@
       <p>No upcoming tournaments.</p>
     {% endif %}
 
-    <h2 style="margin-top: 50px;">🏁 Tournament Results</h2>
+    
+<h2 style="margin-top: 50px;">🏁 Round-wise Tournament Results</h2>
+
+{% set any_results = false %}
+{% for i in range(1, 6) %}
+  {% if results_by_round[i]|length > 0 %}
+    {% set any_results = true %}
+    <h3 style="margin-top: 30px;">🔘 Round {{ i }}</h3>
     <table class="results-table">
       <thead>
         <tr>
           <th>Rank</th>
           <th>Squad</th>
-          <th>Total Kills</th>
-          <th>Total Points</th>
+          <th>Placement</th>
+          <th>Kills</th>
+          <th>Points</th>
         </tr>
       </thead>
       <tbody>
-        {% for squad, rank, kills, total in results %}
+        {% for r in results_by_round[i]|sort(attribute='points', reverse=True) %}
         <tr class="{% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">
           <td>{{ loop.index }}</td>
-          <td>{{ squad }}</td>
-          <td>{{ kills }}</td>
-          <td>{{ total }}</td>
+          <td>{{ r.squad }}</td>
+          <td>{{ r.placement }}</td>
+          <td>{{ r.kills }}</td>
+          <td>{{ r.points }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+  {% endif %}
+{% endfor %}
+
+{% if not any_results %}
+  <p>No tournament results submitted yet.</p>
+{% endif %}
+
   </section>
 
   <!-- Contact Section -->
   <section class="contact section" id="contact" style="display: none;">
     <h2>📞 Contact Us</h2>
-    <p>Email: support@freefirehub.com</p>
-    <p>Instagram: <a href="https://instagram.com" target="_blank">@yourprofile</a></p>
+    <p>Email: karnatakagaming496@gmail.com</p>
+    <p>Instagram: <a href="https://www.instagram.com/shivu_070_?igsh=MTlyZW5mM3ZhOHVnaA==" target="_blank">Rohan</a></p>
     <p>Discord: <a href="https://discord.gg/3HJVyGss" target="_blank">Join Server</a></p>
   </section>
 
@@ -118,7 +132,7 @@
   <footer>
     <p>&copy; 2025 Fire Zone. All rights reserved.</p>
     <div class="social-links">
-      <a href="https://instagram.com" target="_blank">Instagram</a>
+      <a href="https://www.instagram.com/shivu_070_?igsh=MTlyZW5mM3ZhOHVnaA==" target="_blank">Instagram</a>
       <a href="https://youtube.com" target="_blank">YouTube</a>
       <a href="https://discord.gg/3HJVyGss" target="_blank">Discord</a>
     </div>
@@ -128,7 +142,7 @@
   <script>
     function showSection(id) {
       const sections = document.querySelectorAll('.section');
-      sections.forEach(sec => sec.style.display = 'none');
+      sections.forEach(section => section.style.display = 'none');
       const target = document.getElementById(id);
       if (target) {
         target.style.display = 'block';

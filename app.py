@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
 import sqlite3
+from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -24,14 +25,12 @@ def init_db():
     ''')
 
     c.execute('''
-        CREATE TABLE IF NOT EXISTS results (
+        CREATE TABLE IF NOT EXISTS round_results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             squad TEXT NOT NULL,
-            r1_placement INTEGER, r1_kills INTEGER,
-            r2_placement INTEGER, r2_kills INTEGER,
-            r3_placement INTEGER, r3_kills INTEGER,
-            r4_placement INTEGER, r4_kills INTEGER,
-            r5_placement INTEGER, r5_kills INTEGER
+            round_no INTEGER NOT NULL CHECK(round_no BETWEEN 1 AND 5),
+            placement INTEGER NOT NULL,
+            kills INTEGER NOT NULL
         )
     ''')
 
@@ -49,26 +48,28 @@ def index():
     ongoing = c.fetchall()
     c.execute("SELECT name, link FROM tournaments WHERE status='Upcoming'")
     upcoming = c.fetchall()
-    c.execute("SELECT * FROM results")
-    raw_results = c.fetchall()
+
+    # Get round-wise results
+    c.execute("SELECT squad, round_no, placement, kills FROM round_results")
+    rows = c.fetchall()
     conn.close()
 
-    results = []
-    for r in raw_results:
-        squad = r[1]
-        total_kills = r[3] + r[5] + r[7] + r[9] + r[11]
-        total_points = (
-            placement_points.get(r[2], 0) + r[3]*5 +
-            placement_points.get(r[4], 0) + r[5]*5 +
-            placement_points.get(r[6], 0) + r[7]*5 +
-            placement_points.get(r[8], 0) + r[9]*5 +
-            placement_points.get(r[10], 0) + r[11]*5
-        )
-        results.append((squad, '-', total_kills, total_points))
+    results_by_round = defaultdict(list)
+    for squad, round_no, placement, kills in rows:
+        results_by_round[round_no].append({
+            'squad': squad,
+            'placement': placement,
+            'kills': kills,
+            'points': placement_points.get(placement, 0) + kills * 5
+        })
 
-    results_sorted = sorted(results, key=lambda x: x[3], reverse=True)
+    return render_template(
+        'index.html',
+        ongoing=ongoing,
+        upcoming=upcoming,
+        results_by_round=results_by_round
+    )
 
-    return render_template('index.html', ongoing=ongoing, upcoming=upcoming, results=results_sorted)
 
 # Admin Login
 @app.route('/login', methods=['GET', 'POST'])
@@ -86,14 +87,30 @@ def login():
 def dashboard():
     if not session.get('admin'):
         return redirect('/login')
+
     conn = sqlite3.connect('tournaments.db')
     c = conn.cursor()
     c.execute("SELECT * FROM tournaments")
     tournaments = c.fetchall()
-    c.execute("SELECT * FROM results")
-    results = c.fetchall()
+
+    # Fetch round results
+    c.execute("SELECT id, squad, round_no, placement, kills FROM round_results")
+    data = c.fetchall()
     conn.close()
-    return render_template('admin_dashboard.html', tournaments=tournaments, results=results, placement_points=placement_points)
+
+    results_by_round = defaultdict(list)
+    for row in data:
+        round_no = row[2]
+        result = {
+            'id': row[0],
+            'squad': row[1],
+            'placement': row[3],
+            'kills': row[4],
+            'points': placement_points.get(row[3], 0) + row[4] * 5
+        }
+        results_by_round[round_no].append(result)
+
+    return render_template('admin_dashboard.html', tournaments=tournaments, results_by_round=results_by_round, placement_points=placement_points)
 
 # Add Tournament
 @app.route('/add', methods=['POST'])
@@ -122,37 +139,25 @@ def delete(id):
     conn.close()
     return redirect('/dashboard')
 
-# Add Full Result (5 rounds)
+# Add Single Round Result
 @app.route('/add_result', methods=['POST'])
 def add_result():
     if not session.get('admin'):
         return redirect('/login')
     squad = request.form['squad']
-    try:
-        data = []
-        for i in range(1, 6):
-            placement = int(request.form.get(f'r{i}_placement', 0))
-            kills = int(request.form.get(f'r{i}_kills', 0))
-            data.extend([placement, kills])
+    round_no = int(request.form['round_no'])
+    placement = int(request.form['placement'])
+    kills = int(request.form['kills'])
 
-        conn = sqlite3.connect('tournaments.db')
-        c = conn.cursor()
-        c.execute('''
-            INSERT INTO results (
-                squad, 
-                r1_placement, r1_kills,
-                r2_placement, r2_kills,
-                r3_placement, r3_kills,
-                r4_placement, r4_kills,
-                r5_placement, r5_kills
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (squad, *data))
-        conn.commit()
-        conn.close()
-        return redirect('/dashboard')
-
-    except Exception as e:
-        return f"Error: {e}"
+    conn = sqlite3.connect('tournaments.db')
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO round_results (squad, round_no, placement, kills)
+        VALUES (?, ?, ?, ?)
+    ''', (squad, round_no, placement, kills))
+    conn.commit()
+    conn.close()
+    return redirect('/dashboard')
 
 # Delete Result
 @app.route('/delete_result/<int:id>')
@@ -161,10 +166,50 @@ def delete_result(id):
         return redirect('/login')
     conn = sqlite3.connect('tournaments.db')
     c = conn.cursor()
-    c.execute("DELETE FROM results WHERE id=?", (id,))
+    c.execute("DELETE FROM round_results WHERE id=?", (id,))
     conn.commit()
     conn.close()
     return redirect('/dashboard')
+
+
+@app.route('/edit_result/<int:id>', methods=['GET', 'POST'])
+def edit_result(id):
+    if not session.get('admin'):
+        return redirect('/login')
+
+    conn = sqlite3.connect('tournaments.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        squad = request.form['squad']
+        round_no = int(request.form['round_no'])
+        placement = int(request.form['placement'])
+        kills = int(request.form['kills'])
+        c.execute('''
+            UPDATE round_results
+            SET squad=?, round_no=?, placement=?, kills=?
+            WHERE id=?
+        ''', (squad, round_no, placement, kills, id))
+        conn.commit()
+        conn.close()
+        return redirect('/dashboard')
+
+    # GET request: Fetch existing result
+    c.execute("SELECT id, squad, round_no, placement, kills FROM round_results WHERE id=?", (id,))
+    result = c.fetchone()
+    conn.close()
+
+    if result:
+        result_dict = {
+            'id': result[0],
+            'squad': result[1],
+            'round_no': result[2],
+            'placement': result[3],
+            'kills': result[4]
+        }
+        return render_template('edit_result.html', result=result_dict)
+    else:
+        return "Result not found", 404
 
 # Logout
 @app.route('/logout')

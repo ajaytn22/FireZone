@@ -77,7 +77,7 @@ header a:hover {
   position: relative;
   width: 100%;
   height: 80vh;
-  background: url("../static/banner.png") no-repeat center center/cover;
+  background: url("../static/banner.jpeg") no-repeat center center/cover;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -662,4 +662,73 @@ select {
     width: 95%;
     padding: 20px;
   }
+}
+
+
+/* ---------------- Edit Round Result Page ---------------- */
+.edit-form-container {
+  max-width: 500px;
+  margin: 60px auto;
+  padding: 30px;
+  background-color: #1f1f1f;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.15);
+  animation: fadeInUp 1s ease;
+}
+
+.edit-form-container input,
+.edit-form-container select,
+.edit-form-container button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: none;
+  font-size: 16px;
+  background-color: #2a2a2a;
+  color: #fff;
+}
+
+.edit-form-container input:focus,
+.edit-form-container select:focus {
+  outline: none;
+  box-shadow: 0 0 5px #ffcc00;
+}
+
+.edit-form-container button {
+  background-color: #ff9900;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-form-container button:hover {
+  background-color: #ffaa33;
+}
+
+/* Edit Page Header */
+.edit-header {
+  text-align: center;
+  margin: 40px 0 20px;
+}
+
+.edit-header h1 {
+  color: #ffcc00;
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.edit-header a {
+  text-decoration: none;
+  background-color: #ff9900;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.edit-header a:hover {
+  background-color: #ffaa33;
+  color: #000;
 }
